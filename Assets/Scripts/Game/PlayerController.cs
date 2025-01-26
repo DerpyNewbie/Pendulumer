@@ -133,7 +133,12 @@ namespace Game
             OnJump += (v) => { Debug.Log($"[PlayerController] OnJump: {v}"); };
             OnLanding += () => { Debug.Log("[PlayerController] OnLanding"); };
             OnCrouch += (v) => { Debug.Log($"[PlayerController] OnCrouch: {v}"); };
-            OnSlide += (v) => { Debug.Log($"[PlayerController] OnSlide: {v}"); };
+            OnSlide += (v) =>
+            {
+                Debug.Log($"[PlayerController] OnSlide: {v}");
+                _playerState.IsSliding = v == EventContext.Begin;
+                _rb.linearVelocityX *= slidingSpeedMultiplier;
+            };
             OnWallSlide += (v) => { Debug.Log($"[PlayerController] OnWallSlide: {v}"); };
         }
 
@@ -348,14 +353,13 @@ namespace Game
             {
                 if (!_playerState.IsSliding) return;
 
-                _playerState.IsSliding = false;
                 OnSlide?.Invoke(EventContext.End);
                 return;
             }
 
             if (_playerState.IsSliding) return;
 
-            _rb.linearVelocityX *= slidingSpeedMultiplier;
+            OnSlide?.Invoke(EventContext.Begin);
         }
 
         private void HandleJump()
@@ -438,9 +442,7 @@ namespace Game
             _playerState.IsCrouching = true;
             OnCrouch?.Invoke(EventContext.Begin);
 
-            if (Mathf.Abs(_rb.linearVelocityX) < 0.05F) return;
-
-            _playerState.IsSliding = true;
+            if (Mathf.Abs(_rb.linearVelocityX) < 0.05F || !_playerState.IsGrounded) return;
             OnSlide?.Invoke(EventContext.Begin);
         }
 
