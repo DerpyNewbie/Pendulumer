@@ -2,7 +2,7 @@
 
 @font-face {
     font-family: 'Monogram';
-    src: url('/fonts/monogram.ttf');
+    src: url('./fonts/monogram.ttf');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -11,7 +11,7 @@
 
 @font-face {
     font-family: 'BestTen-DOT';
-    src: url('/fonts/BestTen-DOT.otf');
+    src: url('./fonts/BestTen-DOT.otf');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
