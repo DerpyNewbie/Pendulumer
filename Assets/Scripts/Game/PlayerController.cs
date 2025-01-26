@@ -289,11 +289,15 @@ namespace Game
             _rightWall.HasSpaceToClimb = rLedge && !rLedgeSpace;
             _leftWall.HasSpaceToClimb = lLedge && !lLedgeSpace;
 
-            _playerState.LedgeGrabbing = _rightWall.HasSpaceToClimb && !_playerState.IsCrouching
-                ? DirectionalState.Right
-                : _leftWall.HasSpaceToClimb && !_playerState.IsCrouching
-                    ? DirectionalState.Left
-                    : DirectionalState.None;
+
+            _playerState.LedgeGrabbing =
+                _playerState.IsCrouching
+                    ? DirectionalState.None
+                    : _rightWall.HasSpaceToClimb && _playerState.Moving == DirectionalState.Right
+                        ? DirectionalState.Right
+                        : _leftWall.HasSpaceToClimb && _playerState.Moving == DirectionalState.Left
+                            ? DirectionalState.Left
+                            : DirectionalState.None;
 
             _playerState.IsRubbingWall =
                 _rb.linearVelocityY < 0.01F &&
