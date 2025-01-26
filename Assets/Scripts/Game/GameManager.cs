@@ -123,6 +123,8 @@ namespace Game
             Time.timeScale = !isPaused && CurrentState == GameState.InGame ? 1f : 0f;
             playerController.Immobile = isPaused && CurrentState != GameState.InGame;
             hookShotAction.Controllable = !isPaused && CurrentState == GameState.InGame;
+            Cursor.visible = isPaused;
+            Cursor.lockState = CursorLockMode.Confined;
             OnPauseChanged?.Invoke(IsPaused);
         }
     }
