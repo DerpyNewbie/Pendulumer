@@ -1,9 +1,8 @@
-using System;
 using UnityEngine;
 using UnityEngine.Audio;
 using UnityEngine.UI;
 
-namespace Title
+namespace UI
 {
     /*
      * https://github.com/neuneu9/unity-volume-slider/blob/master/VolumeSlider.cs

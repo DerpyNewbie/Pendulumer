@@ -1,11 +1,11 @@
-using System;
+using Game;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Game
+namespace UI
 {
-    public class UIHandler : MonoBehaviour
+    public class InGameScreen : MonoBehaviour
     {
         [SerializeField] private Animator animator;
         private readonly int _animHashState = Animator.StringToHash("State");

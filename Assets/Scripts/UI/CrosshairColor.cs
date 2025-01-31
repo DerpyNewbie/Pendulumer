@@ -1,8 +1,8 @@
 using UnityEngine;
 
-namespace Game
+namespace UI
 {
-    public class CrosshairColor : MonoBehaviour
+    public class SpriteRendererColorChanger : MonoBehaviour
     {
         [SerializeField] private SpriteRenderer[] spriteRenderers;
     

@@ -1,4 +1,5 @@
 using System;
+using UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -16,8 +17,10 @@ namespace Game
 
         [SerializeField] private Transform actualCrosshair;
 
+        [FormerlySerializedAs("actualSpriteRendererColor")]
+        [FormerlySerializedAs("actualCrosshairColor")]
         [FormerlySerializedAs("crosshairColor")] [SerializeField]
-        private CrosshairColor actualCrosshairColor;
+        private SpriteRendererColorChanger actualSpriteRendererColorChanger;
 
         [SerializeField] private Color farColor = Color.red;
         [SerializeField] private Color nearColor = Color.gray;
@@ -181,11 +184,12 @@ namespace Game
                                 Vector2.Distance(hookShotBeginReference.position, actualCrosshair.position);
 
             actualCrosshair.gameObject.SetActive(visibleAndControllable);
-            actualCrosshairColor.SetColor(actualFurther ? farColor : nearColor);
+            actualSpriteRendererColorChanger.SetColor(actualFurther ? farColor : nearColor);
         }
 
         private void Activate()
         {
+            Debug.Log("[HookShotAction] Activate");
             targetRigidbody.transform.position = physicalCrosshair.transform.position;
             targetRigidbody.MovePosition(physicalCrosshair.transform.position);
             targetRigidbody.simulated = true;
@@ -196,6 +200,7 @@ namespace Game
 
         private void Deactivate()
         {
+            Debug.Log("[HookShotAction] Deactivate");
             var hasStateChange = _isHookShotActive;
             targetRigidbody.simulated = false;
             _isHookShotActive = false;
