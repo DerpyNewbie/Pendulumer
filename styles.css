@@ -83,7 +83,14 @@ body {
 
     iframe {
         width: 100%;
-        aspect-ratio: 16/9;
+        aspect-ratio: 16/11;
+        background-color: whitesmoke;
+        border-radius: 10px;
+        border: 15px whitesmoke solid;
+        canvas {
+            width: 480px;
+            height: 480px;
+        }
     }
 }
 
