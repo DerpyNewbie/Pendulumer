@@ -22,27 +22,17 @@ public class DoubleClickToActivate : MonoBehaviour
         if (!_jumpAction.IsPressed() || !_clickAction.WasPerformedThisFrame()) return;
 
         if (Time.time - _lastClickTime < doubleClickTime)
-        {
             ActivateAndDestroy();
-        }
         else
-        {
             _lastClickTime = Time.time;
-        }
     }
 
     private void ActivateAndDestroy()
     {
         monoBehaviour.enabled = true;
-        if (monoBehaviour is HookShotAction action)
-        {
-            action.Controllable = true;
-        }
+        if (monoBehaviour is HookShotAction action) action.Controllable = true;
 
-        foreach (var obj in objects)
-        {
-            obj.SetActive(true);
-        }
+        foreach (var obj in objects) obj.SetActive(true);
 
         Destroy(this);
     }

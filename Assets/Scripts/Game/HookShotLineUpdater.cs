@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 namespace Game
@@ -9,13 +8,17 @@ namespace Game
         [SerializeField] private Transform hookShotHitReference;
         [SerializeField] private Transform hookShotBeginReference;
 
-        private void Awake()
+        private void Update()
         {
-            lineRenderer.SetPosition(0, hookShotBeginReference.position);
-            lineRenderer.SetPosition(1, hookShotHitReference.position);
+            UpdateLineRenderer();
         }
 
-        private void Update()
+        private void OnEnable()
+        {
+            UpdateLineRenderer();
+        }
+
+        private void UpdateLineRenderer()
         {
             lineRenderer.SetPosition(0, hookShotBeginReference.position);
             lineRenderer.SetPosition(1, hookShotHitReference.position);

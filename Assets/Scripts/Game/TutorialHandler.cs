@@ -24,8 +24,6 @@ namespace Game
 
         private void Start()
         {
-            // TODO: consider for toggle hookshot control
-
             hookShotAction.OnActivated += () => hookShotText.text = hookShotDeactivateName;
             hookShotAction.OnDeactivated += () => hookShotText.text = hookShotActivateName;
             gameManager.OnStateChanged +=

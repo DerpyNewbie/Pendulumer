@@ -1,10 +1,18 @@
-using System;
 using UnityEngine;
 
 namespace Game
 {
     public class PlayerAudioPlayer : MonoBehaviour
     {
+        public enum PlayerAudioType
+        {
+            Footstep,
+            Jump,
+            Landing,
+            HookShotAttach,
+            HookShotDetach
+        }
+
         [SerializeField] private HookShotAction hookShotAction;
         [SerializeField] private PlayerController playerController;
 
@@ -14,21 +22,12 @@ namespace Game
         [SerializeField] private AudioSource hookShotAttachAudio;
         [SerializeField] private AudioSource hookShotDetachAudio;
 
-        public enum PlayerAudioType
-        {
-            Footstep,
-            Jump,
-            Landing,
-            HookShotAttach,
-            HookShotDetach,
-        }
-
         private void Start()
         {
             hookShotAction.OnActivated += () => { Play(PlayerAudioType.HookShotAttach); };
             hookShotAction.OnDeactivated += () => { Play(PlayerAudioType.HookShotDetach); };
 
-            playerController.OnJump += (v) =>
+            playerController.OnJump += v =>
             {
                 if (v == PlayerController.EventContext.Begin) Play(PlayerAudioType.Jump);
             };

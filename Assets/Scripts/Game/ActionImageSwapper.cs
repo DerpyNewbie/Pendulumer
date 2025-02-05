@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -11,9 +10,9 @@ namespace Game
         [SerializeField] private bool listenAction = true;
         [SerializeField] private Sprite actionSprite;
         [SerializeField] private string actionName;
+        private Sprite _defaultSprite;
 
         private Image _image;
-        private Sprite _defaultSprite;
         private InputAction _targetAction;
 
         private void Awake()

@@ -142,7 +142,6 @@ GameObject:
   - component: {fileID: 4257787887788122011}
   - component: {fileID: 7993528576105237857}
   - component: {fileID: 9127611656881519800}
-  - component: {fileID: 245940891433549881}
   - component: {fileID: 3313378009724769349}
   m_Layer: 7
   m_Name: Player
@@ -299,92 +298,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &245940891433549881
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 727324490412732720}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 68d6b31a8c574b946bd7a65c13df9357, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetRigidbody: {fileID: 0}
-  lineRenderer: {fileID: 0}
-  aimPreviewRenderer: {fileID: 0}
-  physicalCrosshair: {fileID: 0}
-  actualCrosshair: {fileID: 0}
-  actualCrosshairColor: {fileID: 0}
-  farColor: {r: 1, g: 0, b: 0, a: 1}
-  nearColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  playerAimReference: {fileID: 2982225866046314587}
-  hookShotHitReference: {fileID: 0}
-  hookShotBeginReference: {fileID: 8981293162882684804}
-  layerMask:
-    serializedVersion: 2
-    m_Bits: 1
-  activeGradient:
-    serializedVersion: 2
-    key0: {r: 1, g: 1, b: 1, a: 1}
-    key1: {r: 1, g: 1, b: 1, a: 1}
-    key2: {r: 0, g: 0, b: 0, a: 0}
-    key3: {r: 0, g: 0, b: 0, a: 0}
-    key4: {r: 0, g: 0, b: 0, a: 0}
-    key5: {r: 0, g: 0, b: 0, a: 0}
-    key6: {r: 0, g: 0, b: 0, a: 0}
-    key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 0
-    ctime1: 65535
-    ctime2: 0
-    ctime3: 0
-    ctime4: 0
-    ctime5: 0
-    ctime6: 0
-    ctime7: 0
-    atime0: 0
-    atime1: 65535
-    atime2: 0
-    atime3: 0
-    atime4: 0
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 0
-    m_ColorSpace: -1
-    m_NumColorKeys: 2
-    m_NumAlphaKeys: 2
-  inactiveGradient:
-    serializedVersion: 2
-    key0: {r: 1, g: 0, b: 0, a: 1}
-    key1: {r: 1, g: 0, b: 0, a: 1}
-    key2: {r: 0, g: 0, b: 0, a: 0}
-    key3: {r: 0, g: 0, b: 0, a: 0}
-    key4: {r: 0, g: 0, b: 0, a: 0}
-    key5: {r: 0, g: 0, b: 0, a: 0}
-    key6: {r: 0, g: 0, b: 0, a: 0}
-    key7: {r: 0, g: 0, b: 0, a: 0}
-    ctime0: 0
-    ctime1: 65535
-    ctime2: 0
-    ctime3: 0
-    ctime4: 0
-    ctime5: 0
-    ctime6: 0
-    ctime7: 0
-    atime0: 0
-    atime1: 65535
-    atime2: 0
-    atime3: 0
-    atime4: 0
-    atime5: 0
-    atime6: 0
-    atime7: 0
-    m_Mode: 0
-    m_ColorSpace: -1
-    m_NumColorKeys: 2
-    m_NumAlphaKeys: 2
 --- !u!114 &3313378009724769349
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -397,7 +310,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c5187c0fb515e241b48e4bc5790c628, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hookShotAction: {fileID: 245940891433549881}
+  hookShotAction: {fileID: 0}
   playerController: {fileID: 4257787887788122011}
   footstepAudio: {fileID: 8073568757663185038}
   jumpAudio: {fileID: 8073568757663185038}

@@ -1,29 +1,36 @@
-﻿using UnityEngine;
+﻿using System;
+using Unity.VisualScripting;
+using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace Game
 {
     public class GameManager : MonoBehaviour
     {
+        public delegate void PauseStateDelegate(bool isPaused);
+
+        public delegate void ResultDelegate(GameResult result);
+
+        public delegate void StateDelegate(GameState prevState, GameState newState);
+
         public enum GameState
         {
+            Title = -1,
             PreGame = 0,
             InGame = 1,
             GameOver = 2
         }
 
+        [SerializeField] private string apiUrl = "http://localhost:5000/";
+        [SerializeField] private bool isTitle;
         [SerializeField] private PlayerController playerController;
         [SerializeField] private HookShotAction hookShotAction;
+        [SerializeField] private ScoreHandler scoreHandler;
         [SerializeField] private float timeLimit = 60;
 
-        public delegate void StateDelegate(GameState prevState, GameState newState);
-
-        public delegate void PauseStateDelegate(bool isPaused);
-
-        public event StateDelegate OnStateChanged;
-        public event PauseStateDelegate OnPauseChanged;
-
         private GameState _currentState = GameState.GameOver;
+
+        private GameResult _result = new();
 
         public GameState CurrentState
         {
@@ -42,60 +49,75 @@ namespace Game
 
         public float TimeRemaining { get; private set; }
 
+        public Uri ApiUri => new(apiUrl);
+
+        public bool IsRunning => CurrentState is GameState.InGame or GameState.Title && !IsPaused;
+
+        public GameResult Result => _result.CloneViaSerialization();
+
         private void Awake()
         {
             OnStateChanged +=
                 (oldState, newState) =>
                 {
                     playerController.enabled = true;
-                    hookShotAction.enabled = true;
+                    hookShotAction.enabled = !isTitle;
 
                     switch (newState)
                     {
+                        case GameState.Title:
+                            break;
                         case GameState.PreGame:
                             playerController.Immobile = true;
                             hookShotAction.Controllable = false;
-                            Cursor.visible = false;
-                            Cursor.lockState = CursorLockMode.Confined;
-                            Time.timeScale = 0f;
                             break;
                         case GameState.GameOver:
+                            _result.posX = playerController.transform.position.x;
+                            _result.posY = playerController.transform.position.y;
+                            _result.playtime = timeLimit - TimeRemaining;
+                            _result.score = scoreHandler.Score;
+                            OnResultReady?.Invoke(_result);
+
                             playerController.Immobile = true;
                             hookShotAction.Controllable = false;
-                            Cursor.visible = true;
-                            Cursor.lockState = CursorLockMode.Confined;
-                            Time.timeScale = 0f;
                             break;
                         case GameState.InGame:
+                            _result = new GameResult();
                             playerController.Immobile = false;
                             hookShotAction.Controllable = true;
-                            Cursor.visible = false;
-                            Cursor.lockState = CursorLockMode.Confined;
-                            Time.timeScale = 1f;
                             break;
                     }
 
+                    UpdateTimeScale();
+                    UpdateCursor();
                     Debug.Log($"[GameMan] State changing from {oldState.ToString()} to {newState.ToString()}");
                 };
 
-            CurrentState = GameState.PreGame;
+            CurrentState = isTitle ? GameState.Title : GameState.PreGame;
             TimeRemaining = timeLimit;
+        }
+
+        private void Start()
+        {
+            playerController.OnJump += ctx =>
+            {
+                if (ctx == PlayerController.EventContext.Begin) _result.jumpCount++;
+            };
+
+            hookShotAction.OnActivated += () => { _result.clickCount++; };
         }
 
         private void Update()
         {
-            switch (CurrentState)
-            {
-                case GameState.PreGame:
-                    return;
-                case GameState.InGame:
-                    TimeRemaining -= Time.deltaTime;
-                    if (TimeRemaining <= 0 || playerController.State.IsDead) CurrentState = GameState.GameOver;
-                    return;
-                case GameState.GameOver:
-                    return;
-            }
+            if (CurrentState is not GameState.InGame) return;
+
+            TimeRemaining -= Time.deltaTime;
+            if (TimeRemaining <= 0 || playerController.State.IsDead) CurrentState = GameState.GameOver;
         }
+
+        public event StateDelegate OnStateChanged;
+        public event PauseStateDelegate OnPauseChanged;
+        public event ResultDelegate OnResultReady;
 
         public void ChangeState(GameState state)
         {
@@ -116,16 +138,38 @@ namespace Game
             }
         }
 
+        public void UpdateTimeScale()
+        {
+            Time.timeScale = IsPaused ? 0f : CurrentState is GameState.InGame or GameState.Title ? 1f : 0f;
+        }
+
+        public void UpdateCursor()
+        {
+            Cursor.visible = IsPaused || CurrentState is not (GameState.InGame or GameState.PreGame);
+            Cursor.lockState = CursorLockMode.Confined;
+        }
+
         public void SetPaused(bool isPaused)
         {
-            if (IsPaused == isPaused) return;
+            if (IsPaused == isPaused || (_currentState == GameState.GameOver && !IsPaused)) return;
             IsPaused = isPaused;
-            Time.timeScale = !isPaused && CurrentState == GameState.InGame ? 1f : 0f;
             playerController.Immobile = isPaused && CurrentState != GameState.InGame;
             hookShotAction.Controllable = !isPaused && CurrentState == GameState.InGame;
-            Cursor.visible = isPaused;
-            Cursor.lockState = CursorLockMode.Confined;
+            UpdateTimeScale();
+            UpdateCursor();
             OnPauseChanged?.Invoke(IsPaused);
+        }
+
+        private void OnJump(PlayerController.EventContext context)
+        {
+            if (!IsRunning) return;
+            if (context == PlayerController.EventContext.Begin) _result.jumpCount++;
+        }
+
+        private void OnHookShotActivate()
+        {
+            if (!IsRunning) return;
+            _result.clickCount++;
         }
     }
 }

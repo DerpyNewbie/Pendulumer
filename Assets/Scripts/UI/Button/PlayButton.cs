@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace UI
+namespace UI.Button
 {
     public class PlayButton : MonoBehaviour
     {

@@ -1,24 +1,21 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public static class SceneLoader
 {
-    private class StaticCoroutineRunner : MonoBehaviour
-    {
-    }
-
     public enum SceneType
     {
         Title,
         Game
     }
 
-    private static Dictionary<SceneType, string> _sceneDict = new()
+    private static readonly Dictionary<SceneType, string> _sceneDict = new()
     {
         { SceneType.Title, "Pendulumer-Title" },
-        { SceneType.Game, "Pendulumer-Prototype" },
+        { SceneType.Game, "Pendulumer-Prototype" }
     };
 
     private static GameObject _loadingScreen;
@@ -27,11 +24,7 @@ public static class SceneLoader
 
     public static void SetupLoadingScreen()
     {
-        if (_coroutineRunner == null)
-        {
-            _coroutineRunner = new GameObject("StaticCoroutineRunner").AddComponent<StaticCoroutineRunner>();
-            Object.DontDestroyOnLoad(_coroutineRunner.gameObject);
-        }
+        EnsureCoroutineRunnerExists();
 
         if (_loadingScreen != null) return;
 
@@ -46,8 +39,48 @@ public static class SceneLoader
         SetupLoadingScreen();
 
         _loadingScreen.SetActive(true);
-        _coroutineRunner.StartCoroutine(TransitionToScene(_sceneDict[sceneType]));
+        StartStaticCoroutine(TransitionToScene(_sceneDict[sceneType]));
     }
+
+    #region StaticCoroutines
+
+    public static Coroutine StartStaticCoroutine(string methodName, object value)
+    {
+        EnsureCoroutineRunnerExists();
+
+        return _coroutineRunner.StartCoroutine(methodName, value);
+    }
+
+    public static Coroutine StartStaticCoroutine(IEnumerator routine)
+    {
+        EnsureCoroutineRunnerExists();
+
+        return _coroutineRunner.StartCoroutine(routine);
+    }
+
+    public static void StopStaticCoroutine(IEnumerator routine)
+    {
+        EnsureCoroutineRunnerExists();
+
+        _coroutineRunner.StopCoroutine(routine);
+    }
+
+    public static void StopStaticCoroutine(Coroutine routine)
+    {
+        EnsureCoroutineRunnerExists();
+
+        _coroutineRunner.StopCoroutine(routine);
+    }
+
+    private static void EnsureCoroutineRunnerExists()
+    {
+        if (_coroutineRunner != null) return;
+
+        _coroutineRunner = new GameObject("StaticCoroutineRunner").AddComponent<StaticCoroutineRunner>();
+        Object.DontDestroyOnLoad(_coroutineRunner.gameObject);
+    }
+
+    #endregion
 
     private static IEnumerator TransitionToScene(string sceneName)
     {
@@ -58,11 +91,13 @@ public static class SceneLoader
             yield break;
         }
 
-        while (!asyncOp.isDone)
-        {
-            yield return null;
-        }
+        while (!asyncOp.isDone) yield return null;
 
+        yield return new WaitForNextFrameUnit();
         _loadingScreen.SetActive(false);
+    }
+
+    private class StaticCoroutineRunner : MonoBehaviour
+    {
     }
 }

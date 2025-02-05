@@ -24,7 +24,7 @@ namespace UI
         {
             mixer.GetFloat(parameter, out var volume);
             slider.value = Db2Pa(volume);
-            slider.onValueChanged.AddListener((value) => mixer.SetFloat(parameter, Pa2Db(value)));
+            slider.onValueChanged.AddListener(value => mixer.SetFloat(parameter, Pa2Db(value)));
         }
 
         private void OnDisable()
@@ -33,8 +33,8 @@ namespace UI
         }
 
         /// <summary>
-        /// デシベル変換
-        /// 0, 1, 10の音圧→-80, 0, 20のデシベル
+        ///     デシベル変換
+        ///     0, 1, 10の音圧→-80, 0, 20のデシベル
         /// </summary>
         /// <param name="pa"></param>
         /// <returns></returns>
@@ -45,8 +45,8 @@ namespace UI
         }
 
         /// <summary>
-        /// 音圧変換
-        /// -80, 0, 20のデシベル→0, 1, 10の音圧
+        ///     音圧変換
+        ///     -80, 0, 20のデシベル→0, 1, 10の音圧
         /// </summary>
         /// <param name="db"></param>
         /// <returns></returns>

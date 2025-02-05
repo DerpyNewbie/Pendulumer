@@ -31,16 +31,16 @@ namespace Game
         [SerializeField] private Gradient activeGradient;
         [SerializeField] private Gradient inactiveGradient;
 
-        private Camera _mainCamera;
-        private InputAction _attackAction;
-        private InputAction _previewToggleAction;
-        private bool _isHookShotActive;
-        private bool _controllable;
-        private bool _hasCrosshairHit;
-
         private Action<InputAction.CallbackContext> _activateAction;
-        private Action<InputAction.CallbackContext> _deactivateAction;
         private Action<InputAction.CallbackContext> _aimPreviewToggleAction;
+        private InputAction _attackAction;
+        private bool _controllable;
+        private Action<InputAction.CallbackContext> _deactivateAction;
+        private bool _hasCrosshairHit;
+        private bool _isHookShotActive;
+
+        private Camera _mainCamera;
+        private InputAction _previewToggleAction;
 
         public bool Controllable
         {
@@ -80,12 +80,6 @@ namespace Game
             }
         }
 
-        public event Action OnActivated;
-        public event Action OnDeactivated;
-        public event Action OnCrosshairHitChanged;
-        public event Action OnControlActivated;
-        public event Action OnControlDeactivated;
-
 
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         private void Awake()
@@ -116,18 +110,6 @@ namespace Game
             _previewToggleAction.performed += _aimPreviewToggleAction;
         }
 
-        private void OnDestroy()
-        {
-            _attackAction.performed -= _activateAction;
-            _attackAction.canceled -= _deactivateAction;
-        }
-
-        private void OnEnable()
-        {
-            targetRigidbody.simulated = false;
-            UpdateVisuals();
-        }
-
         // Update is called once per frame
         private void Update()
         {
@@ -137,10 +119,31 @@ namespace Game
             UpdateVisuals();
         }
 
+        private void OnEnable()
+        {
+            targetRigidbody.simulated = false;
+            UpdateVisuals();
+        }
+
+        private void OnDestroy()
+        {
+            _attackAction.performed -= _activateAction;
+            _attackAction.canceled -= _deactivateAction;
+        }
+
+        public event Action OnActivated;
+        public event Action OnDeactivated;
+        public event Action OnCrosshairHitChanged;
+        public event Action OnControlActivated;
+        public event Action OnControlDeactivated;
+
         private void UpdateCrosshairPosition()
         {
-            bool IsInsideScreen(Vector3 vec) => _mainCamera.pixelHeight > vec.y && 0 < vec.y &&
-                                                _mainCamera.pixelWidth > vec.x && 0 < vec.x;
+            bool IsInsideScreen(Vector3 vec)
+            {
+                return _mainCamera.pixelHeight > vec.y && 0 < vec.y &&
+                       _mainCamera.pixelWidth > vec.x && 0 < vec.x;
+            }
 
             var mousePoint = Mouse.current.position.ReadValue();
             var worldPoint =
@@ -156,17 +159,15 @@ namespace Game
             );
 
             HasCrosshairHit = hit.collider != null && IsInsideScreen(_mainCamera.WorldToScreenPoint(hit.point));
-            if (HasCrosshairHit)
-            {
-                physicalCrosshair.transform.position = hit.point;
-            }
+            if (HasCrosshairHit) physicalCrosshair.transform.position = hit.point;
         }
 
         private void UpdateVisuals()
         {
             aimPreviewRenderer.colorGradient = HasCrosshairHit ? activeGradient : inactiveGradient;
             aimPreviewRenderer.SetPosition(0, (Vector2)hookShotBeginReference.position);
-            aimPreviewRenderer.SetPosition(1, (Vector2)(HasCrosshairHit ? physicalCrosshair.position : actualCrosshair.position));
+            aimPreviewRenderer.SetPosition(1,
+                (Vector2)(HasCrosshairHit ? physicalCrosshair.position : actualCrosshair.position));
 
             if (_isHookShotActive)
             {
@@ -180,7 +181,8 @@ namespace Game
             aimPreviewRenderer.gameObject.SetActive(visibleAndControllable);
             physicalCrosshair.gameObject.SetActive(visibleAndControllable && HasCrosshairHit);
 
-            var actualFurther = !HasCrosshairHit || Vector2.Distance(hookShotBeginReference.position, physicalCrosshair.position) <
+            var actualFurther = !HasCrosshairHit ||
+                                Vector2.Distance(hookShotBeginReference.position, physicalCrosshair.position) <
                                 Vector2.Distance(hookShotBeginReference.position, actualCrosshair.position);
 
             actualCrosshair.gameObject.SetActive(visibleAndControllable);

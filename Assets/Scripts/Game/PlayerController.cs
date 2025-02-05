@@ -1,23 +1,15 @@
 using System;
 using JetBrains.Annotations;
-
+using UnityEngine;
+using UnityEngine.InputSystem;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-
-using UnityEngine;
-using UnityEngine.InputSystem;
 
 namespace Game
 {
     public class PlayerController : MonoBehaviour
     {
-        public enum EventContext
-        {
-            Begin,
-            End
-        }
-
         public enum DirectionalState
         {
             None = 0,
@@ -25,26 +17,10 @@ namespace Game
             Right = 2
         }
 
-        public struct PlayerState
+        public enum EventContext
         {
-            public DirectionalState Moving;
-            public DirectionalState LedgeGrabbing;
-            public bool IsDead;
-            public bool IsJumping;
-            public bool IsSliding;
-            public bool IsGrounded;
-            public bool IsCrouching;
-            public bool IsClimbingLedge;
-            public bool IsRubbingWall;
-
-            public bool IsGrabbingLedge => LedgeGrabbing != DirectionalState.None;
-            public bool IsMoving => Moving != DirectionalState.None;
-        }
-
-        public struct WallInfo
-        {
-            public bool HasWall;
-            public bool HasSpaceToClimb;
+            Begin,
+            End
         }
 
         [Header("Base")]
@@ -83,42 +59,34 @@ namespace Game
         [SerializeField] private Vector2 ledgeCheckOffset = new(0.5F, 1F);
 
         [SerializeField] private Vector2 ledgeCheckSize = new(0.5F, 0.1F);
-
-        private Rigidbody2D _rb;
-        private Vector2 _initialPlayerSpritePos;
-        private float _currentXVelocity;
-        private float _jumpTimer;
-
-        private PlayerState _playerState;
-        private WallInfo _leftWall;
-        private WallInfo _rightWall;
+        private readonly int _animIsClimbingLedge = Animator.StringToHash("IsClimbingLedge");
+        private readonly int _animIsCrouching = Animator.StringToHash("IsCrouching");
+        private readonly int _animIsDead = Animator.StringToHash("IsDead");
+        private readonly int _animIsGrabbingLedge = Animator.StringToHash("IsGrabbingLedge");
+        private readonly int _animIsGrounded = Animator.StringToHash("IsGrounded");
+        private readonly int _animIsJumping = Animator.StringToHash("IsJumping");
+        private readonly int _animIsRubbingWall = Animator.StringToHash("IsRubbingWall");
+        private readonly int _animIsSliding = Animator.StringToHash("IsSliding");
+        private readonly int _animLookLeft = Animator.StringToHash("LookLeft");
 
         private readonly int _animVelX = Animator.StringToHash("VelX");
         private readonly int _animVelY = Animator.StringToHash("VelY");
-        private readonly int _animIsGrounded = Animator.StringToHash("IsGrounded");
-        private readonly int _animIsCrouching = Animator.StringToHash("IsCrouching");
-        private readonly int _animIsJumping = Animator.StringToHash("IsJumping");
-        private readonly int _animIsGrabbingLedge = Animator.StringToHash("IsGrabbingLedge");
-        private readonly int _animIsClimbingLedge = Animator.StringToHash("IsClimbingLedge");
-        private readonly int _animLookLeft = Animator.StringToHash("LookLeft");
-        private readonly int _animIsDead = Animator.StringToHash("IsDead");
-        private readonly int _animIsSliding = Animator.StringToHash("IsSliding");
-        private readonly int _animIsRubbingWall = Animator.StringToHash("IsRubbingWall");
+        private InputAction _crouchAction;
+        private float _currentXVelocity;
+        private Vector2 _initialPlayerSpritePos;
+        private InputAction _jumpAction;
+        private float _jumpTimer;
+        private WallInfo _leftWall;
 
         private InputAction _moveAction;
-        private InputAction _jumpAction;
-        private InputAction _crouchAction;
+
+        private PlayerState _playerState;
+
+        private Rigidbody2D _rb;
+        private WallInfo _rightWall;
 
         public bool Immobile { get; set; }
         public PlayerState State => _playerState;
-
-        public event Action<float> OnMove;
-        public event Action<EventContext> OnJump;
-        public event Action<EventContext> OnCrouch;
-        public event Action<EventContext> OnSlide;
-        public event Action<EventContext> OnWallSlide;
-        public event Action OnLanding;
-        public event Action OnWallJumping;
 
 
         private void Awake()
@@ -130,16 +98,35 @@ namespace Game
             _jumpAction = InputSystem.actions.FindAction("Jump");
             _crouchAction = InputSystem.actions.FindAction("Crouch");
 
-            OnJump += (v) => { Debug.Log($"[PlayerController] OnJump: {v}"); };
+            OnJump += v => { Debug.Log($"[PlayerController] OnJump: {v}"); };
             OnLanding += () => { Debug.Log("[PlayerController] OnLanding"); };
-            OnCrouch += (v) => { Debug.Log($"[PlayerController] OnCrouch: {v}"); };
-            OnSlide += (v) =>
+            OnCrouch += v => { Debug.Log($"[PlayerController] OnCrouch: {v}"); };
+            OnSlide += v =>
             {
                 Debug.Log($"[PlayerController] OnSlide: {v}");
                 _playerState.IsSliding = v == EventContext.Begin;
                 _rb.linearVelocityX *= slidingSpeedMultiplier;
             };
-            OnWallSlide += (v) => { Debug.Log($"[PlayerController] OnWallSlide: {v}"); };
+            OnWallSlide += v => { Debug.Log($"[PlayerController] OnWallSlide: {v}"); };
+        }
+
+        // Update is called once per frame
+        private void Update()
+        {
+            if (_playerState.IsDead || gameManager.IsPaused) return;
+
+            CheckGround();
+            CheckWall();
+
+            if (!Immobile)
+            {
+                HandleMovement();
+                HandleWedgeGrabbing();
+                HandleSliding();
+                HandleJump();
+            }
+
+            UpdateAnimator();
         }
 
         private void OnEnable()
@@ -197,61 +184,19 @@ namespace Game
         }
 #endif
 
-        // Update is called once per frame
-        private void Update()
-        {
-            if (_playerState.IsDead || gameManager.IsPaused)
-            {
-                return;
-            }
-
-            CheckGround();
-            CheckWall();
-
-            if (!Immobile)
-            {
-                HandleMovement();
-                HandleWedgeGrabbing();
-                HandleSliding();
-                HandleJump();
-            }
-
-            UpdateAnimator();
-        }
+        public event Action<float> OnMove;
+        public event Action<EventContext> OnJump;
+        public event Action<EventContext> OnCrouch;
+        public event Action<EventContext> OnSlide;
+        public event Action<EventContext> OnWallSlide;
+        public event Action OnLanding;
+        public event Action OnWallJumping;
 
         public void OnDamaged(DamagingObject damagingObject)
         {
             _playerState.IsDead = true;
             UpdateAnimator();
         }
-
-        #region AnimatorCallbacks
-
-        // Called by Animator
-        [PublicAPI]
-        private void EndLedgeClimbingAnimation()
-        {
-            _playerState.IsClimbingLedge = false;
-            ApplyTargetPositionToSprite();
-            ApplySpritePosition();
-        }
-
-        // Called by Animator
-        [PublicAPI]
-        private void ApplyTargetPositionToSprite()
-        {
-            playerSprite.position = playerTarget.position;
-        }
-
-        // Called by Animator
-        [PublicAPI]
-        private void ApplySpritePosition()
-        {
-            transform.position += playerSprite.localPosition - (Vector3)_initialPlayerSpritePos;
-            playerSprite.localPosition = _initialPlayerSpritePos;
-        }
-
-        #endregion
 
         private void CheckGround()
         {
@@ -263,10 +208,7 @@ namespace Game
                 obstacleLayer
             );
 
-            if (lastGrounded != _playerState.IsGrounded && _playerState.IsGrounded)
-            {
-                OnLanding?.Invoke();
-            }
+            if (lastGrounded != _playerState.IsGrounded && _playerState.IsGrounded) OnLanding?.Invoke();
         }
 
         private void CheckWall()
@@ -370,10 +312,7 @@ namespace Game
         {
             if (!_playerState.IsJumping)
             {
-                if (_playerState.IsGrounded)
-                {
-                    _jumpTimer = 0;
-                }
+                if (_playerState.IsGrounded) _jumpTimer = 0;
 
                 return;
             }
@@ -455,5 +394,55 @@ namespace Game
             _playerState.IsCrouching = false;
             OnCrouch?.Invoke(EventContext.End);
         }
+
+        public struct PlayerState
+        {
+            public DirectionalState Moving;
+            public DirectionalState LedgeGrabbing;
+            public bool IsDead;
+            public bool IsJumping;
+            public bool IsSliding;
+            public bool IsGrounded;
+            public bool IsCrouching;
+            public bool IsClimbingLedge;
+            public bool IsRubbingWall;
+
+            public bool IsGrabbingLedge => LedgeGrabbing != DirectionalState.None;
+            public bool IsMoving => Moving != DirectionalState.None;
+        }
+
+        public struct WallInfo
+        {
+            public bool HasWall;
+            public bool HasSpaceToClimb;
+        }
+
+        #region AnimatorCallbacks
+
+        // Called by Animator
+        [PublicAPI]
+        private void EndLedgeClimbingAnimation()
+        {
+            _playerState.IsClimbingLedge = false;
+            ApplyTargetPositionToSprite();
+            ApplySpritePosition();
+        }
+
+        // Called by Animator
+        [PublicAPI]
+        private void ApplyTargetPositionToSprite()
+        {
+            playerSprite.position = playerTarget.position;
+        }
+
+        // Called by Animator
+        [PublicAPI]
+        private void ApplySpritePosition()
+        {
+            transform.position += playerSprite.localPosition - (Vector3)_initialPlayerSpritePos;
+            playerSprite.localPosition = _initialPlayerSpritePos;
+        }
+
+        #endregion
     }
 }

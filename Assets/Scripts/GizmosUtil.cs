@@ -1,13 +1,14 @@
 ﻿using System;
 using Game;
+using UnityEditor;
 using UnityEngine;
 
 public class GizmosUtil
 {
-    private static Texture2D _gizmoTextStyleBackground;
-    private static GUIStyle _gizmoTextStyle;
     public const int LabelPadding = 10;
     public const bool AddNewLine = true;
+    private static Texture2D _gizmoTextStyleBackground;
+    private static GUIStyle _gizmoTextStyle;
 
     public static Texture2D GizmoTextStyleBackground => _gizmoTextStyleBackground ??=
         ((Func<Texture2D>)(() =>
@@ -76,28 +77,28 @@ public class GizmosUtil
         float textSize = 15f)
     {
 #if UNITY_EDITOR
-        var view = UnityEditor.SceneView.currentDrawingSceneView;
+        var view = SceneView.currentDrawingSceneView;
         if (!view)
             return;
-        Vector3 screenPosition = view.camera.WorldToScreenPoint(worldPosition);
+        var screenPosition = view.camera.WorldToScreenPoint(worldPosition);
         if (screenPosition.y < 0 || screenPosition.y > view.camera.pixelHeight || screenPosition.x < 0 ||
             screenPosition.x > view.camera.pixelWidth || screenPosition.z < 0)
             return;
-        var pixelRatio = UnityEditor.HandleUtility.GUIPointToScreenPixelCoordinate(Vector2.right).x -
-                         UnityEditor.HandleUtility.GUIPointToScreenPixelCoordinate(Vector2.zero).x;
-        UnityEditor.Handles.BeginGUI();
+        var pixelRatio = HandleUtility.GUIPointToScreenPixelCoordinate(Vector2.right).x -
+                         HandleUtility.GUIPointToScreenPixelCoordinate(Vector2.zero).x;
+        Handles.BeginGUI();
         var style = new GUIStyle(GUI.skin.label)
         {
             fontSize = (int)textSize,
-            normal = new GUIStyleState() { textColor = textColor }
+            normal = new GUIStyleState { textColor = textColor }
         };
-        Vector2 size = style.CalcSize(new GUIContent(text)) * pixelRatio;
+        var size = style.CalcSize(new GUIContent(text)) * pixelRatio;
         var alignedPosition =
             ((Vector2)screenPosition +
              size * ((anchor + Vector2.left + Vector2.up) / 2f)) * (Vector2.right + Vector2.down) +
             Vector2.up * view.camera.pixelHeight;
         GUI.Label(new Rect(alignedPosition / pixelRatio, size / pixelRatio), text, style);
-        UnityEditor.Handles.EndGUI();
+        Handles.EndGUI();
 #endif
     }
 }

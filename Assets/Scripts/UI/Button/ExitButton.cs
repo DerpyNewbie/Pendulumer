@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace UI
+namespace UI.Button
 {
     public class ExitButton : MonoBehaviour
     {

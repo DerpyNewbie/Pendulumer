@@ -1,21 +1,24 @@
 using System.Collections;
-using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
-namespace UI
+namespace UI.Button
 {
-    public class RainbowTextUGUI : MonoBehaviour
+    public class RainbowButton : MonoBehaviour
     {
         [SerializeField]
-        private TextMeshProUGUI text;
+        private UnityEngine.UI.Button button;
 
         [SerializeField] private float speed = 0.1F;
         [SerializeField] private float saturation = 1;
         [SerializeField] private float value = 1;
 
+        private ColorBlock _colorBlock;
+
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         private void Start()
         {
+            _colorBlock = button.colors;
             StartCoroutine(UpdateColor());
         }
 
@@ -23,7 +26,9 @@ namespace UI
         {
             while (true)
             {
-                text.color = Color.HSVToRGB(Mathf.PingPong(Time.unscaledTime * speed, 1), saturation, value);
+                _colorBlock.normalColor =
+                    Color.HSVToRGB(Mathf.PingPong(Time.unscaledTime * speed, 1), saturation, value);
+                button.colors = _colorBlock;
                 yield return null;
             }
         }

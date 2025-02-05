@@ -1,5 +1,4 @@
 using Game;
-using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,22 +7,19 @@ namespace UI
     public class InGameScreen : MonoBehaviour
     {
         [SerializeField] private Animator animator;
-        private readonly int _animHashState = Animator.StringToHash("State");
-        private readonly int _animHashReady = Animator.StringToHash("Ready");
-        private readonly int _animHashPaused = Animator.StringToHash("Paused");
 
         [SerializeField] private GameManager gameManager;
-        [SerializeField] private ScoreHandler scoreHandler;
-        [SerializeField] private TextMeshProUGUI scoreText;
-        [SerializeField] private TextMeshProUGUI highScoreText;
         [SerializeField] private AudioSource countdownBeep;
         [SerializeField] private AudioSource startBeep;
+        private readonly int _animHashPaused = Animator.StringToHash("Paused");
+        private readonly int _animHashReady = Animator.StringToHash("Ready");
+        private readonly int _animHashState = Animator.StringToHash("State");
 
-        private InputAction _moveAction;
+        private InputAction _cancelAction;
         private InputAction _fireAction;
         private InputAction _jumpAction;
 
-        private InputAction _cancelAction;
+        private InputAction _moveAction;
 
         private bool _waitingForGameStart;
 
@@ -40,20 +36,18 @@ namespace UI
             _jumpAction.performed += OnReadyUpCallback;
 
             _cancelAction.performed += TogglePauseCallback;
-            
-            gameManager.OnPauseChanged += OnPauseChangedCallback;
-        }
 
-        private void OnDestroy()
-        {
-            _cancelAction.performed -= TogglePauseCallback;
+            gameManager.OnPauseChanged += OnPauseChangedCallback;
         }
 
         public void Update()
         {
             animator.SetInteger(_animHashState, (int)gameManager.CurrentState);
-            scoreText.text = $"Score: {scoreHandler.Score:F0}m";
-            highScoreText.text = $"High Score: {ScoreHandler.HighScore:F0}m";
+        }
+
+        private void OnDestroy()
+        {
+            _cancelAction.performed -= TogglePauseCallback;
         }
 
         public void OnGameStart()
