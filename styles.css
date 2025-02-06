@@ -68,7 +68,7 @@ footer {
     font-size: 20px;
     background-color: #1d1d1d;
     color: whitesmoke;
-    margin: 6rem 0 0 0;
+    margin-top: 6rem;
     padding: 4rem;
 }
 
@@ -87,19 +87,22 @@ body {
         background-color: whitesmoke;
         border-radius: 10px;
         border: 15px whitesmoke solid;
+
         canvas {
             width: 480px;
             height: 480px;
         }
+
+        margin: 2rem 0;
     }
 }
 
 .drop-shadow {
-    filter: drop-shadow(4px 4px 2px #000000) drop-shadow(4px 4px 4px #000000) drop-shadow(4px 4px 8px #000000);
+    filter: drop-shadow(6px 6px 4px #000000) drop-shadow(1px 1px 2px #000000);
 }
 
 .title-background {
-    padding: 8rem;
+    padding: 1rem 1rem 8rem 1rem;
     background-size: auto 40rem;
     background-repeat: repeat-x;
     background-position: top;
@@ -107,8 +110,18 @@ body {
     background-image: url('./img/background.png');
 }
 
+.content {
+    filter: drop-shadow(0 0 0.75rem black);
+    background-color: #151515bb;
+    margin: 5rem auto;
+    padding: 1rem 2rem;
+    max-width: 75rem;
+    align-content: center;
+    border-radius: 2rem;
+}
+
 .main-section {
-    padding: 0 25%;
+    padding: 0 20%;
     word-break: auto-phrase;
 
     h2 {
@@ -167,6 +180,7 @@ body {
 }
 
 .align-center {
+    margin: auto;
     align-content: center;
     align-self: center;
     justify-content: center;
@@ -219,6 +233,59 @@ body {
 }
 
 .anchor-right {
+    display: flex;
+    justify-content: right;
     text-anchor: end;
     margin: auto 0 auto auto;
+}
+
+.button {
+    flex-grow: 1;
+    max-width: 440px;
+    min-width: 300px;
+    margin: 1rem .5rem;
+    padding: 0;
+    width: 10rem;
+    height: 5rem;
+    font-size: 1.5rem;
+    flex-basis: 440px;
+    border-radius: 2rem;
+    list-style: none;
+    filter: drop-shadow(0 0 0.75rem black);
+    display: inline-block;
+    position: relative;
+    color: #f6fffd;
+    background-image: radial-gradient(circle, rgb(38, 29, 33, 1) 0%, rgb(63, 42, 52) 100%);
+    z-index: 100;
+
+    &:before {
+        transition: opacity .3s;
+        content: '';
+        border-radius: inherit;
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        display: block;
+        background-image: radial-gradient(circle, rgb(253, 197, 218) 0%, rgb(253, 197, 242) 100%);
+        position: absolute;
+        opacity: 0;
+        z-index: -100;
+    }
+
+    &:hover {
+        &:before {
+            opacity: 1;
+            transition: opacity .1s;
+        }
+    }
+
+    a {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        align-content: center;
+    }
 }
