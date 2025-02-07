@@ -1,5 +1,6 @@
 using System;
 using UI;
+using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -38,6 +39,7 @@ namespace Game
         private Action<InputAction.CallbackContext> _deactivateAction;
         private bool _hasCrosshairHit;
         private bool _isHookShotActive;
+        private Vector2 _lastMousePosition;
 
         private Camera _mainCamera;
         private InputAction _previewToggleAction;
@@ -85,21 +87,22 @@ namespace Game
         private void Awake()
         {
             _mainCamera = Camera.main;
+
             aimPreviewRenderer.colorGradient = inactiveGradient;
             _activateAction = _ =>
             {
                 if (!Controllable) return;
 
-                if ((!PlayerConfig.HookShot.ToggleShot || !_isHookShotActive) && HasCrosshairHit) Activate();
+                if ((!PlayerConfig.ToggleHookShot || !_isHookShotActive) && HasCrosshairHit) Activate();
                 else Deactivate();
             };
 
             _deactivateAction = _ =>
             {
-                if (Controllable && !PlayerConfig.HookShot.ToggleShot) Deactivate();
+                if (Controllable && !PlayerConfig.ToggleHookShot) Deactivate();
             };
 
-            _aimPreviewToggleAction = _ => { IsPreviewVisible = !IsPreviewVisible; };
+            // _aimPreviewToggleAction = _ => { IsPreviewVisible = !IsPreviewVisible; };
 
             _attackAction = InputSystem.actions.FindAction("Attack");
             _previewToggleAction = InputSystem.actions.FindAction("Sprint");
@@ -107,7 +110,7 @@ namespace Game
 
             _attackAction.performed += _activateAction;
             _attackAction.canceled += _deactivateAction;
-            _previewToggleAction.performed += _aimPreviewToggleAction;
+            // _previewToggleAction.performed += _aimPreviewToggleAction;
         }
 
         // Update is called once per frame
@@ -129,6 +132,7 @@ namespace Game
         {
             _attackAction.performed -= _activateAction;
             _attackAction.canceled -= _deactivateAction;
+            // _previewToggleAction.performed -= _aimPreviewToggleAction;
         }
 
         public event Action OnActivated;
@@ -191,7 +195,7 @@ namespace Game
 
         private void Activate()
         {
-            Debug.Log("[HookShotAction] Activate");
+            // Debug.Log("[HookShotAction] Activate");
             targetRigidbody.transform.position = physicalCrosshair.transform.position;
             targetRigidbody.MovePosition(physicalCrosshair.transform.position);
             targetRigidbody.simulated = true;
@@ -202,7 +206,7 @@ namespace Game
 
         private void Deactivate()
         {
-            Debug.Log("[HookShotAction] Deactivate");
+            // Debug.Log("[HookShotAction] Deactivate");
             var hasStateChange = _isHookShotActive;
             targetRigidbody.simulated = false;
             _isHookShotActive = false;

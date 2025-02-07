@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -44,6 +45,7 @@ public static class SceneLoader
 
     #region StaticCoroutines
 
+    [PublicAPI]
     public static Coroutine StartStaticCoroutine(string methodName, object value)
     {
         EnsureCoroutineRunnerExists();
@@ -51,6 +53,7 @@ public static class SceneLoader
         return _coroutineRunner.StartCoroutine(methodName, value);
     }
 
+    [PublicAPI]
     public static Coroutine StartStaticCoroutine(IEnumerator routine)
     {
         EnsureCoroutineRunnerExists();
@@ -58,6 +61,7 @@ public static class SceneLoader
         return _coroutineRunner.StartCoroutine(routine);
     }
 
+    [PublicAPI]
     public static void StopStaticCoroutine(IEnumerator routine)
     {
         EnsureCoroutineRunnerExists();
@@ -65,6 +69,7 @@ public static class SceneLoader
         _coroutineRunner.StopCoroutine(routine);
     }
 
+    [PublicAPI]
     public static void StopStaticCoroutine(Coroutine routine)
     {
         EnsureCoroutineRunnerExists();

@@ -47,7 +47,13 @@ namespace UI
 
         private void OnDestroy()
         {
+            _moveAction.performed -= OnReadyUpCallback;
+            _fireAction.performed -= OnReadyUpCallback;
+            _jumpAction.performed -= OnReadyUpCallback;
+
             _cancelAction.performed -= TogglePauseCallback;
+
+            gameManager.OnPauseChanged -= OnPauseChangedCallback;
         }
 
         public void OnGameStart()

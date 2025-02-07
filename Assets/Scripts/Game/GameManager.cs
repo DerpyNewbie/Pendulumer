@@ -1,4 +1,5 @@
 ﻿using System;
+using DefaultNamespace;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -30,8 +31,6 @@ namespace Game
 
         private GameState _currentState = GameState.GameOver;
 
-        private GameResult _result = new();
-
         public GameState CurrentState
         {
             get => _currentState;
@@ -53,7 +52,7 @@ namespace Game
 
         public bool IsRunning => CurrentState is GameState.InGame or GameState.Title && !IsPaused;
 
-        public GameResult Result => _result.CloneViaSerialization();
+        public GameResult Result { get; private set; } = new();
 
         private void Awake()
         {
@@ -72,17 +71,20 @@ namespace Game
                             hookShotAction.Controllable = false;
                             break;
                         case GameState.GameOver:
-                            _result.posX = playerController.transform.position.x;
-                            _result.posY = playerController.transform.position.y;
-                            _result.playtime = timeLimit - TimeRemaining;
-                            _result.score = scoreHandler.Score;
-                            OnResultReady?.Invoke(_result);
+                            var buildInfo = Resources.Load<BuildInfo>("BuildInfo");
+                            Result.posX = playerController.transform.position.x;
+                            Result.posY = playerController.transform.position.y;
+                            Result.playtime = timeLimit - TimeRemaining;
+                            Result.score = scoreHandler.Score;
+                            Result.version = buildInfo.count;
+                            Result.HasSent = false;
+                            OnResultReady?.Invoke(Result);
 
                             playerController.Immobile = true;
                             hookShotAction.Controllable = false;
                             break;
                         case GameState.InGame:
-                            _result = new GameResult();
+                            Result = new GameResult();
                             playerController.Immobile = false;
                             hookShotAction.Controllable = true;
                             break;
@@ -99,12 +101,14 @@ namespace Game
 
         private void Start()
         {
-            playerController.OnJump += ctx =>
-            {
-                if (ctx == PlayerController.EventContext.Begin) _result.jumpCount++;
-            };
+            playerController.OnJump += OnJump;
+            hookShotAction.OnActivated += OnHookShotActivate;
+        }
 
-            hookShotAction.OnActivated += () => { _result.clickCount++; };
+        private void OnDestroy()
+        {
+            playerController.OnJump -= OnJump;
+            hookShotAction.OnActivated -= OnHookShotActivate;
         }
 
         private void Update()
@@ -163,13 +167,13 @@ namespace Game
         private void OnJump(PlayerController.EventContext context)
         {
             if (!IsRunning) return;
-            if (context == PlayerController.EventContext.Begin) _result.jumpCount++;
+            if (context == PlayerController.EventContext.Begin) Result.jumpCount++;
         }
 
         private void OnHookShotActivate()
         {
             if (!IsRunning) return;
-            _result.clickCount++;
+            Result.clickCount++;
         }
     }
 }

@@ -12,5 +12,9 @@ namespace Game
         public float posY;
         public int clickCount;
         public int jumpCount;
+        public int version;
+
+        [NonSerialized]
+        public bool HasSent;
     }
 }

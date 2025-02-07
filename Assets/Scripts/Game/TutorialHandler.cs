@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -20,6 +21,7 @@ namespace Game
         private void Awake()
         {
             _moveAction = InputSystem.actions.FindAction("Move");
+            UpdateVisibility(PlayerConfig.ShowTutorial);
         }
 
         private void Start()
@@ -36,6 +38,11 @@ namespace Game
 
             movementLeftSwapper.PressAction(!Mathf.Approximately(move.x, 0) && move.x < 0);
             movementRightSwapper.PressAction(!Mathf.Approximately(move.x, 0) && move.x > 0);
+        }
+
+        public void UpdateVisibility(bool showTutorial)
+        {
+            gameObject.SetActive(showTutorial);
         }
     }
 }

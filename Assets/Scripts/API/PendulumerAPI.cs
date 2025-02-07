@@ -49,6 +49,13 @@ namespace API
         public IEnumerator PostRecord(GameResult result, Action<ResultRecord> callback,
             Action<UnityWebRequest> onError = null)
         {
+            if (result.HasSent)
+            {
+                Debug.LogWarning("[PendulumerAPI] Trying to re-send result, ignoring the call!");
+                onError?.Invoke(null);
+                yield break;
+            }
+
             var request = UnityWebRequest.Post(
                 new Uri(_baseUri, "/api/v1/results"),
                 JsonUtility.ToJson(result),
@@ -58,9 +65,13 @@ namespace API
             yield return request.SendWebRequest();
 
             if (request.result != UnityWebRequest.Result.Success)
+            {
                 onError?.Invoke(request);
-            else
-                callback.Invoke(JsonUtility.FromJson<ResultRecord>(request.downloadHandler.text));
+                yield break;
+            }
+
+            result.HasSent = true;
+            callback.Invoke(JsonUtility.FromJson<ResultRecord>(request.downloadHandler.text));
         }
 
         public IEnumerator GetStats(Action<StatsRecord> callback, Action<UnityWebRequest> onError = null)

@@ -26,6 +26,7 @@ namespace UI.Text
             yield return api.GetStats(stats =>
             {
                 _text.text = $"Recorded Playtime : {TimeSpan.FromSeconds(stats.totalPlaytime):dd\\.hh\\:mm\\:ss}\n" +
+                             $"Recorded Players  : {stats.totalUsers}\n" +
                              $"Recorded Games    : {stats.totalResults}\n" +
                              $"Recorded Hookshots: {stats.totalClickCount}\n" +
                              $"Recorded Jumps    : {stats.totalJumpCount}";

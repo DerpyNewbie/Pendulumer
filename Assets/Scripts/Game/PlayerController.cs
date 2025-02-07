@@ -98,16 +98,16 @@ namespace Game
             _jumpAction = InputSystem.actions.FindAction("Jump");
             _crouchAction = InputSystem.actions.FindAction("Crouch");
 
-            OnJump += v => { Debug.Log($"[PlayerController] OnJump: {v}"); };
-            OnLanding += () => { Debug.Log("[PlayerController] OnLanding"); };
-            OnCrouch += v => { Debug.Log($"[PlayerController] OnCrouch: {v}"); };
+            // OnJump += v => { Debug.Log($"[PlayerController] OnJump: {v}"); };
+            // OnLanding += () => { Debug.Log("[PlayerController] OnLanding"); };
+            // OnCrouch += v => { Debug.Log($"[PlayerController] OnCrouch: {v}"); };
             OnSlide += v =>
             {
-                Debug.Log($"[PlayerController] OnSlide: {v}");
+                // Debug.Log($"[PlayerController] OnSlide: {v}");
                 _playerState.IsSliding = v == EventContext.Begin;
                 _rb.linearVelocityX *= slidingSpeedMultiplier;
             };
-            OnWallSlide += v => { Debug.Log($"[PlayerController] OnWallSlide: {v}"); };
+            // OnWallSlide += v => { Debug.Log($"[PlayerController] OnWallSlide: {v}"); };
         }
 
         // Update is called once per frame
@@ -242,7 +242,7 @@ namespace Game
                             : DirectionalState.None;
 
             _playerState.IsRubbingWall =
-                _rb.linearVelocityY < 0.01F &&
+                // _rb.linearVelocityY < 0.01F &&
                 !_playerState.IsGrounded &&
                 (_playerState.Moving == DirectionalState.Right ? _rightWall.HasWall : _leftWall.HasWall);
         }
