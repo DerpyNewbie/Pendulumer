@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using API;
 using Game;
 using UnityEngine;
@@ -33,8 +32,8 @@ namespace UI.Button
         {
             SceneLoader.StartStaticCoroutine(
                 ResultSendCoroutine.SubmitAnonResult(gameManager.Result, gameManager.ApiUri,
-                    (v) => { Debug.Log($"Successfully sent anonymous record: {v}"); },
-                    (v) => { Debug.Log($"Failed to send anonymous record: {v.error}"); }
+                    v => { Debug.Log($"Successfully sent anonymous record: {v}"); },
+                    v => { Debug.Log($"Failed to send anonymous record: {v.error}"); }
                 ));
         }
     }

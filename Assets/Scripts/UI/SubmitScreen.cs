@@ -9,7 +9,7 @@ namespace UI
     {
         [SerializeField]
         private GameObject submitScreen;
-        
+
         [SerializeField]
         private GameObject submittingScreen;
 

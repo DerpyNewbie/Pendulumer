@@ -1,6 +1,5 @@
 ﻿using System;
 using DefaultNamespace;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -105,18 +104,18 @@ namespace Game
             hookShotAction.OnActivated += OnHookShotActivate;
         }
 
-        private void OnDestroy()
-        {
-            playerController.OnJump -= OnJump;
-            hookShotAction.OnActivated -= OnHookShotActivate;
-        }
-
         private void Update()
         {
             if (CurrentState is not GameState.InGame) return;
 
             TimeRemaining -= Time.deltaTime;
             if (TimeRemaining <= 0 || playerController.State.IsDead) CurrentState = GameState.GameOver;
+        }
+
+        private void OnDestroy()
+        {
+            playerController.OnJump -= OnJump;
+            hookShotAction.OnActivated -= OnHookShotActivate;
         }
 
         public event StateDelegate OnStateChanged;
