@@ -1,5 +1,4 @@
-﻿using System;
-using Game;
+﻿using Game;
 using UnityEngine;
 
 namespace UI.Toggle
@@ -7,7 +6,7 @@ namespace UI.Toggle
     public class TutorialToggle : MonoBehaviour
     {
         [SerializeField]
-        private TutorialHandler tutorialHandler;
+        private TutorialHandler[] tutorialHandler;
 
         private UnityEngine.UI.Toggle _toggle;
 
@@ -30,7 +29,10 @@ namespace UI.Toggle
         private void OnValueChanged(bool value)
         {
             PlayerConfig.ShowTutorial = value;
-            if (tutorialHandler) tutorialHandler.UpdateVisibility(value);
+            foreach (var handler in tutorialHandler)
+            {
+                handler.UpdateVisibility(value);
+            }
         }
     }
 }
