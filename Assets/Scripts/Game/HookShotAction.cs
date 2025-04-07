@@ -1,6 +1,5 @@
 using System;
 using UI;
-using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -9,6 +8,7 @@ namespace Game
 {
     public class HookShotAction : MonoBehaviour
     {
+        [SerializeField] private PlayerInput playerInput;
         [SerializeField] private Rigidbody2D targetRigidbody;
         [SerializeField] private LineRenderer lineRenderer;
         [SerializeField] private LineRenderer aimPreviewRenderer;
@@ -32,17 +32,20 @@ namespace Game
         [SerializeField] private Gradient activeGradient;
         [SerializeField] private Gradient inactiveGradient;
 
-        private Action<InputAction.CallbackContext> _activateAction;
-        private Action<InputAction.CallbackContext> _aimPreviewToggleAction;
+        private InputAction _lookAction;
         private InputAction _attackAction;
+
         private bool _controllable;
-        private Action<InputAction.CallbackContext> _deactivateAction;
         private bool _hasCrosshairHit;
         private bool _isHookShotActive;
-        private Vector2 _lastMousePosition;
+        private bool _hasHookShotFixed;
+
+        private Vector2 _lastLookInput;
 
         private Camera _mainCamera;
-        private InputAction _previewToggleAction;
+        private DistanceJoint2D _distanceJoint;
+        private SpriteRenderer _jointRenderer;
+
 
         public bool Controllable
         {
@@ -69,7 +72,7 @@ namespace Game
         }
 
 
-        public bool IsPreviewVisible { get; private set; } = true;
+        public bool IsPreviewVisible { get; } = true;
 
         public bool HasCrosshairHit
         {
@@ -87,30 +90,15 @@ namespace Game
         private void Awake()
         {
             _mainCamera = Camera.main;
+            _distanceJoint = targetRigidbody.GetComponent<DistanceJoint2D>();
+            _jointRenderer = targetRigidbody.GetComponent<SpriteRenderer>();
 
             aimPreviewRenderer.colorGradient = inactiveGradient;
-            _activateAction = _ =>
-            {
-                if (!Controllable) return;
 
-                if ((!PlayerConfig.ToggleHookShot || !_isHookShotActive) && HasCrosshairHit) Activate();
-                else Deactivate();
-            };
-
-            _deactivateAction = _ =>
-            {
-                if (Controllable && !PlayerConfig.ToggleHookShot) Deactivate();
-            };
-
-            // _aimPreviewToggleAction = _ => { IsPreviewVisible = !IsPreviewVisible; };
-
-            _attackAction = InputSystem.actions.FindAction("Attack");
-            _previewToggleAction = InputSystem.actions.FindAction("Sprint");
-
-
-            _attackAction.performed += _activateAction;
-            _attackAction.canceled += _deactivateAction;
-            // _previewToggleAction.performed += _aimPreviewToggleAction;
+            _lookAction = playerInput.actions.FindAction("Look");
+            _attackAction = playerInput.actions.FindAction("Attack");
+            _attackAction.performed += OnAttackAction;
+            _attackAction.canceled += OnAttackAction;
         }
 
         // Update is called once per frame
@@ -120,6 +108,19 @@ namespace Game
 
             UpdateCrosshairPosition();
             UpdateVisuals();
+            UpdateJoint();
+        }
+
+        private void UpdateJoint()
+        {
+            if (_hasHookShotFixed) return;
+
+            if (_distanceJoint.connectedBody.linearVelocityY > 0) return;
+
+            _distanceJoint.distance =
+                Vector2.Distance(_distanceJoint.transform.position, playerAimReference.position) + 0.5F;
+            Debug.Log($"Hookshot has been fixed to {_distanceJoint.distance}m");
+            _hasHookShotFixed = true;
         }
 
         private void OnEnable()
@@ -130,9 +131,8 @@ namespace Game
 
         private void OnDestroy()
         {
-            _attackAction.performed -= _activateAction;
-            _attackAction.canceled -= _deactivateAction;
-            // _previewToggleAction.performed -= _aimPreviewToggleAction;
+            _attackAction.performed -= OnAttackAction;
+            _attackAction.canceled -= OnAttackAction;
         }
 
         public event Action OnActivated;
@@ -149,15 +149,38 @@ namespace Game
                        _mainCamera.pixelWidth > vec.x && 0 < vec.x;
             }
 
-            var mousePoint = Mouse.current.position.ReadValue();
-            var worldPoint =
-                _mainCamera.ScreenToWorldPoint(new Vector3(mousePoint.x, mousePoint.y, _mainCamera.nearClipPlane));
+            if (playerInput.currentControlScheme == "Gamepad")
+            {
+                var viewportAimRef = _mainCamera.WorldToViewportPoint(playerAimReference.position);
+                var look = _lookAction.ReadValue<Vector2>();
 
-            actualCrosshair.position = worldPoint;
+                if (look.magnitude < 0.5f)
+                {
+                    look = _lastLookInput;
+                }
+                else
+                {
+                    _lastLookInput = look;
+                }
+
+                viewportAimRef += (Vector3)look;
+                actualCrosshair.position = _mainCamera.ViewportToWorldPoint(new Vector3(
+                    Mathf.Clamp01(viewportAimRef.x),
+                    Mathf.Clamp01(viewportAimRef.y),
+                    Mathf.Clamp01(viewportAimRef.z))
+                ) + (Vector3)look;
+            }
+            else
+            {
+                var mousePoint = Mouse.current.position.ReadValue();
+                actualCrosshair.position =
+                    _mainCamera.ScreenToWorldPoint(new Vector3(mousePoint.x, mousePoint.y, _mainCamera.nearClipPlane));
+            }
+
 
             var hit = Physics2D.Raycast(
                 playerAimReference.position,
-                worldPoint - playerAimReference.position,
+                actualCrosshair.position - playerAimReference.position,
                 100F,
                 layerMask
             );
@@ -178,6 +201,8 @@ namespace Game
                 lineRenderer.SetPosition(0, hookShotBeginReference.transform.position);
                 lineRenderer.SetPosition(1, hookShotHitReference.transform.position);
             }
+
+            _jointRenderer.enabled = _isHookShotActive;
 
             var visibleAndControllable = Controllable && IsPreviewVisible;
 
@@ -200,6 +225,7 @@ namespace Game
             targetRigidbody.MovePosition(physicalCrosshair.transform.position);
             targetRigidbody.simulated = true;
             _isHookShotActive = true;
+            _hasHookShotFixed = false;
             UpdateVisuals();
             OnActivated?.Invoke();
         }
@@ -213,6 +239,23 @@ namespace Game
             UpdateVisuals();
 
             if (hasStateChange) OnDeactivated?.Invoke();
+        }
+
+        private void OnAttackAction(InputAction.CallbackContext ctx)
+        {
+            if (ctx.performed)
+            {
+                if (!Controllable) return;
+
+                if ((!PlayerConfig.ToggleHookShot || !_isHookShotActive) && HasCrosshairHit) Activate();
+                else Deactivate();
+
+                return;
+            }
+
+            if (ctx.canceled)
+                if (Controllable && !PlayerConfig.ToggleHookShot)
+                    Deactivate();
         }
     }
 }
