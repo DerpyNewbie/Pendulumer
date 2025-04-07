@@ -13,7 +13,7 @@ public static class SceneLoader
         Game
     }
 
-    private static readonly Dictionary<SceneType, string> _sceneDict = new()
+    private static readonly Dictionary<SceneType, string> SceneDict = new()
     {
         { SceneType.Title, "Pendulumer-Title" },
         { SceneType.Game, "Pendulumer-Prototype" }
@@ -40,7 +40,26 @@ public static class SceneLoader
         SetupLoadingScreen();
 
         _loadingScreen.SetActive(true);
-        StartStaticCoroutine(TransitionToScene(_sceneDict[sceneType]));
+        StartStaticCoroutine(TransitionToScene(SceneDict[sceneType]));
+    }
+
+    private static IEnumerator TransitionToScene(string sceneName)
+    {
+        var asyncOp = SceneManager.LoadSceneAsync(sceneName);
+        if (asyncOp == null)
+        {
+            _loadingScreen.SetActive(false);
+            yield break;
+        }
+
+        while (!asyncOp.isDone) yield return null;
+
+        yield return new WaitForNextFrameUnit();
+        _loadingScreen.SetActive(false);
+    }
+
+    private class StaticCoroutineRunner : MonoBehaviour
+    {
     }
 
     #region StaticCoroutines
@@ -86,23 +105,4 @@ public static class SceneLoader
     }
 
     #endregion
-
-    private static IEnumerator TransitionToScene(string sceneName)
-    {
-        var asyncOp = SceneManager.LoadSceneAsync(sceneName);
-        if (asyncOp == null)
-        {
-            _loadingScreen.SetActive(false);
-            yield break;
-        }
-
-        while (!asyncOp.isDone) yield return null;
-
-        yield return new WaitForNextFrameUnit();
-        _loadingScreen.SetActive(false);
-    }
-
-    private class StaticCoroutineRunner : MonoBehaviour
-    {
-    }
 }
