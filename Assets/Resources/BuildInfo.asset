@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1968d6f1aac44c49945661f74ab6912, type: 3}
   m_Name: BuildInfo
   m_EditorClassIdentifier: 
-  version: 1.0.4
-  count: 22
+  version: 1.1.0-easymode
+  count: 26
