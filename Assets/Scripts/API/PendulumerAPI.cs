@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using DefaultNamespace;
 using Game;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -17,7 +18,8 @@ namespace API
 
         public IEnumerator GetLeaderboard(Action<LeaderboardRecord[]> callback, Action<UnityWebRequest> onError = null)
         {
-            var uri = new Uri(_baseUri, $"/api/v1/leaderboard?t={GetUnixTime()}");
+            var buildInfo = Resources.Load<BuildInfo>("BuildInfo");
+            var uri = new Uri(_baseUri, $"/api/v1/leaderboard?t={GetUnixTime()}&version={buildInfo.version}&count={buildInfo.count}");
             var request = UnityWebRequest.Get(uri);
 
             SetNoCache(request);
