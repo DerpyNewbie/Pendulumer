@@ -38,9 +38,10 @@ namespace Game
 
 
         [Header("Jump")]
-        [SerializeField] private float jumpForce = 5F;
+        [SerializeField] private float jumpForce = 7F;
 
         [SerializeField] private float jumpTime = 0.25F;
+        [SerializeField] private float coyoteTime = 0.5F;
 
         [Header("Wall Jump")]
         [SerializeField] private Vector2 wallJumpVelocity = new(2, 5);
@@ -208,7 +209,11 @@ namespace Game
                 obstacleLayer
             );
 
-            if (lastGrounded != _playerState.IsGrounded && _playerState.IsGrounded) OnLanding?.Invoke();
+            if (_playerState.IsGrounded)
+            {
+                _playerState.LastGroundedTime = Time.timeSinceLevelLoad;
+                if (lastGrounded != _playerState.IsGrounded) OnLanding?.Invoke();
+            }
         }
 
         private void CheckWall()
@@ -364,7 +369,9 @@ namespace Game
                     _playerState.IsJumping = true;
                     OnWallJumping?.Invoke();
                     return;
-                case { IsGrounded: true }:
+                default:
+                    if (Time.timeSinceLevelLoad - _playerState.LastGroundedTime > coyoteTime) return;
+
                     _jumpTimer = 0;
                     _playerState.IsJumping = true;
                     OnJump?.Invoke(EventContext.Begin);
@@ -406,7 +413,7 @@ namespace Game
             public bool IsCrouching;
             public bool IsClimbingLedge;
             public bool IsRubbingWall;
-
+            public float LastGroundedTime;
             public bool IsGrabbingLedge => LedgeGrabbing != DirectionalState.None;
             public bool IsMoving => Moving != DirectionalState.None;
         }
