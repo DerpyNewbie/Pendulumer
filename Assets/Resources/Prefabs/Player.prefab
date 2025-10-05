@@ -224,6 +224,7 @@ MonoBehaviour:
     m_Bits: 3
   jumpForce: 7
   jumpTime: 0.25
+  coyoteTime: 0.5
   wallJumpVelocity: {x: 8, y: 8}
   groundCheckOffset: {x: 0, y: -1}
   groundCheckSize: {x: 0.9, y: 0.01}

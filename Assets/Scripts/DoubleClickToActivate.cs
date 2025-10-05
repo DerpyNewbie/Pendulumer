@@ -1,6 +1,6 @@
-﻿using Game;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
+using HookShotAction = Game.HookShotAction;
 
 public class DoubleClickToActivate : MonoBehaviour
 {
@@ -13,7 +13,7 @@ public class DoubleClickToActivate : MonoBehaviour
 
     private void Awake()
     {
-        _jumpAction = InputSystem.actions.FindAction("Jump");
+        _jumpAction = InputSystem.actions.FindAction("JumpAction");
         _clickAction = InputSystem.actions.FindAction("Attack");
     }
 

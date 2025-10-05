@@ -623,12 +623,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68d6b31a8c574b946bd7a65c13df9357, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerInput: {fileID: 0}
   targetRigidbody: {fileID: 4934509978566041699}
   lineRenderer: {fileID: 2522729339795399716}
   aimPreviewRenderer: {fileID: 5358673447471242016}
   physicalCrosshair: {fileID: 6237049111134940341}
   actualCrosshair: {fileID: 8467665315198020232}
-  actualCrosshairColor: {fileID: 414839741182515732}
+  actualSpriteRendererColorChanger: {fileID: 414839741182515732}
   farColor: {r: 1, g: 0, b: 0, a: 1}
   nearColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   playerAimReference: {fileID: 0}
@@ -669,8 +670,8 @@ MonoBehaviour:
     m_NumAlphaKeys: 2
   inactiveGradient:
     serializedVersion: 2
-    key0: {r: 1, g: 0, b: 0, a: 1}
-    key1: {r: 1, g: 0, b: 0, a: 1}
+    key0: {r: 1, g: 0, b: 0, a: 0}
+    key1: {r: 1, g: 0, b: 0, a: 0}
     key2: {r: 0, g: 0, b: 0, a: 0}
     key3: {r: 0, g: 0, b: 0, a: 0}
     key4: {r: 0, g: 0, b: 0, a: 0}

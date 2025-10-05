@@ -27,7 +27,7 @@ namespace UI
         {
             _moveAction = InputSystem.actions.FindAction("Move");
             _fireAction = InputSystem.actions.FindAction("Attack");
-            _jumpAction = InputSystem.actions.FindAction("Jump");
+            _jumpAction = InputSystem.actions.FindAction("JumpAction");
 
             _cancelAction = InputSystem.actions.FindAction("Cancel");
 
