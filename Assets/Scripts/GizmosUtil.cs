@@ -1,5 +1,6 @@
 ﻿using System;
 using Game;
+using Game.Player;
 using UnityEditor;
 using UnityEngine;
 
@@ -66,10 +67,9 @@ public class GizmosUtil
         return Field(label, ColoredValue(value));
     }
 
-    public static string ColoredField(string label, PlayerController.DirectionalState value)
+    public static string ColoredField(string label, LookDirection value)
     {
-        return ColoredField(label, Enum.GetName(typeof(PlayerController.DirectionalState), value),
-            value != PlayerController.DirectionalState.None);
+        return ColoredField(label, Enum.GetName(typeof(LookDirection), value), value == LookDirection.Right);
     }
 
 

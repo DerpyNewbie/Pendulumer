@@ -15,7 +15,21 @@ namespace Game.Player
     public class PlayerState : MonoBehaviour
     {
         [SerializeField] private Rigidbody2D rb;
+        private float _lastGroundedTime;
+        private long _lastGroundedFrame;
         private bool _isGrounded;
+        private bool _isJumping;
+        private bool _immobile;
+
+        public bool Immobile
+        {
+            get => _immobile;
+            set
+            {
+                _immobile = value;
+                Rigidbody.simulated = !value;
+            }
+        }
 
         public bool IsDead { get; set; }
 
@@ -29,15 +43,31 @@ namespace Game.Player
                 if (_isGrounded == value) return;
 
                 _isGrounded = value;
-                if (!_isGrounded) return;
-
                 LastGroundedTime = Time.time;
                 LastGroundedFrame = Time.frameCount;
+
+                if (_isGrounded)
+                {
+                    OnLand?.Invoke();
+                }
             }
         }
 
         public bool IsCrouching { get; set; }
-        public bool IsJumping { get; set; }
+
+        public bool IsJumping
+        {
+            get => _isJumping;
+            set
+            {
+                _isJumping = value;
+                if (value)
+                {
+                    OnJump?.Invoke();
+                }
+            }
+        }
+
         public bool IsJumpingCanceled { get; set; }
         public bool IsSliding { get; set; }
         public bool IsGrabbingLedge { get; set; }
@@ -46,52 +76,51 @@ namespace Game.Player
         public bool HasWall { get; set; }
         public bool CanClimb { get; set; }
 
-        public float LastGroundedTime { get; private set; }
-        public long LastGroundedFrame { get; private set; }
+        public float LastGroundedTime
+        {
+            get => IsGrounded ? Time.time : _lastGroundedTime;
+            private set => _lastGroundedTime = value;
+        }
+
+        public long LastGroundedFrame
+        {
+            get => IsGrounded ? Time.frameCount : _lastGroundedFrame;
+            private set => _lastGroundedFrame = value;
+        }
 
         public Rigidbody2D Rigidbody => rb;
+
+        public event System.Action OnJump;
+        public event System.Action OnLand;
+
+        public void OnDamaged()
+        {
+            IsDead = true;
+        }
 
 #if UNITY_EDITOR
         private void OnDrawGizmos()
         {
             Handles.BeginGUI();
             Handles.Label(transform.position + Vector3.up * 4,
-                GizmosUtil.ColoredField("vel", rb != null ? rb.linearVelocity : Vector2.zero) +
+                GizmosUtil.ColoredField("immobile", Immobile) +
+                GizmosUtil.ColoredField("dead", IsDead) +
                 GizmosUtil.ColoredField("look", LookDirection.ToString(), true) +
                 GizmosUtil.ColoredField("grounded", IsGrounded) +
+                GizmosUtil.ColoredField("crouching", IsCrouching) +
                 GizmosUtil.ColoredField("jumping", IsJumping) +
                 GizmosUtil.ColoredField("jump_canceled", IsJumpingCanceled) +
-                GizmosUtil.ColoredField("crouching", IsCrouching) +
                 GizmosUtil.ColoredField("sliding", IsSliding) +
-                GizmosUtil.ColoredField("grounded_frame", LastGroundedFrame) +
+                GizmosUtil.ColoredField("ledge_grab", IsGrabbingLedge) +
+                GizmosUtil.ColoredField("ledge_climb", IsClimbingLedge) +
                 GizmosUtil.ColoredField("has_wall", HasWall) +
-                GizmosUtil.ColoredField("can_climb", CanClimb), GizmosUtil.GizmoTextStyle);
-
-            // GizmosUtil.ColoredField("autoSlide", _playerState.IsAutoSliding) +
-            // GizmosUtil.ColoredField("jumping", _playerState.IsJumping) +
-            // GizmosUtil.ColoredField("jumpTimer", _jumpTimer) +
-            // GizmosUtil.ColoredField("ledgeGrab", _playerState.LedgeGrabbing) +
-            // GizmosUtil.ColoredField("ledgeClimb", _playerState.IsClimbingLedge) +
-            // GizmosUtil.ColoredField("wall_rub", _playerState.IsRubbingWall) +
-            // GizmosUtil.ColoredField("dead", _playerState.IsDead), GizmosUtil.GizmoTextStyle);
+                GizmosUtil.ColoredField("can_climb", CanClimb) +
+                GizmosUtil.ColoredField("vel", rb != null ? rb.linearVelocity : Vector2.zero) +
+                GizmosUtil.ColoredField("grounded_time", LastGroundedTime) +
+                GizmosUtil.ColoredField("grounded_frame", LastGroundedFrame),
+                GizmosUtil.GizmoTextStyle);
 
             Handles.EndGUI();
-
-            // var pos = (Vector2)transform.position;
-            // Gizmos.color = _playerState.IsGrounded ? Color.red : Color.green;
-            // Gizmos.DrawWireCube(pos + groundCheckOffset, groundCheckSize);
-            //
-            // Gizmos.color = _rightWall.HasWall ? Color.red : Color.green;
-            // Gizmos.DrawWireCube(pos + wallCheckOffset, wallCheckSize);
-            //
-            // Gizmos.color = _leftWall.HasWall ? Color.red : Color.green;
-            // Gizmos.DrawWireCube(pos + wallCheckOffset * new Vector2(-1, 1), wallCheckSize);
-            //
-            // Gizmos.color = _playerState.LedgeGrabbing == DirectionalState.Right ? Color.red : Color.green;
-            // Gizmos.DrawWireCube(pos + ledgeCheckOffset, ledgeCheckSize);
-            //
-            // Gizmos.color = _playerState.LedgeGrabbing == DirectionalState.Left ? Color.red : Color.green;
-            // Gizmos.DrawWireCube(pos + ledgeCheckOffset * new Vector2(-1, 1), ledgeCheckSize);
         }
 #endif
     }

@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.InputSystem;
-using HookShotAction = Game.HookShotAction;
 
 public class DoubleClickToActivate : MonoBehaviour
 {
@@ -13,7 +12,7 @@ public class DoubleClickToActivate : MonoBehaviour
 
     private void Awake()
     {
-        _jumpAction = InputSystem.actions.FindAction("JumpAction");
+        _jumpAction = InputSystem.actions.FindAction("Jump");
         _clickAction = InputSystem.actions.FindAction("Attack");
     }
 
@@ -30,7 +29,7 @@ public class DoubleClickToActivate : MonoBehaviour
     private void ActivateAndDestroy()
     {
         monoBehaviour.enabled = true;
-        if (monoBehaviour is HookShotAction action) action.Controllable = true;
+        if (monoBehaviour is Game.Player.Action.HookShotAction action) action.Controllable = true;
 
         foreach (var obj in objects) obj.SetActive(true);
 

@@ -52,11 +52,13 @@ namespace Game.Player.Action
 
         private bool CanSlide()
         {
-            return playerState.IsGrounded && Mathf.Abs(playerState.Rigidbody.linearVelocityX) > slideRequiredSpeed;
+            return !playerState.Immobile && playerState.IsGrounded && Mathf.Abs(playerState.Rigidbody.linearVelocityX) > slideRequiredSpeed;
         }
 
         private void Update()
         {
+            if (playerState.Immobile) return;
+
             var groundedInFrame = Time.frameCount - playerState.LastGroundedFrame <= 1;
             var shouldAutoSlide = PlayerConfig.DoAutoSlide && !playerState.IsSliding && groundedInFrame;
             if ((_doSliding || shouldAutoSlide) && !playerState.IsSliding)

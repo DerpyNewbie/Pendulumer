@@ -1,3 +1,4 @@
+using Game.Player;
 using UnityEngine;
 
 namespace Game
@@ -13,8 +14,8 @@ namespace Game
             HookShotDetach
         }
 
-        [SerializeField] private HookShotAction hookShotAction;
-        [SerializeField] private PlayerController playerController;
+        [SerializeField] private Player.Action.HookShotAction hookShotAction;
+        [SerializeField] private PlayerState playerState;
 
         [SerializeField] private AudioSource footstepAudio;
         [SerializeField] private AudioSource jumpAudio;
@@ -24,16 +25,11 @@ namespace Game
 
         private void Start()
         {
-            hookShotAction.OnActivated += () => { Play(PlayerAudioType.HookShotAttach); };
-            hookShotAction.OnDeactivated += () => { Play(PlayerAudioType.HookShotDetach); };
+            hookShotAction.OnHookShotActivated += () => { Play(PlayerAudioType.HookShotAttach); };
+            hookShotAction.OnHookShotDeactivated += () => { Play(PlayerAudioType.HookShotDetach); };
 
-            playerController.OnJump += v =>
-            {
-                if (v == PlayerController.EventContext.Begin) Play(PlayerAudioType.Jump);
-            };
-
-            playerController.OnWallJumping += () => { Play(PlayerAudioType.Jump); };
-            playerController.OnLanding += () => { Play(PlayerAudioType.Landing); };
+            playerState.OnJump += () => { Play(PlayerAudioType.Jump); };
+            playerState.OnLand += () => { Play(PlayerAudioType.Landing); };
         }
 
         public void Play(PlayerAudioType type)

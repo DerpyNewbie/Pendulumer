@@ -20,6 +20,8 @@ namespace Game.Player.Action
 
         private void Update()
         {
+            if (playerState.Immobile) return;
+
             if (playerState.CanClimb && !playerState.IsCrouching)
             {
                 playerState.Rigidbody.linearVelocityY = 0;

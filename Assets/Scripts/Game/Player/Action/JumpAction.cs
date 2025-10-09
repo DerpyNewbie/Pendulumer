@@ -12,6 +12,8 @@ namespace Game.Player.Action
 
         [SerializeField] private float jumpTime = 0.25F;
 
+        [SerializeField] private float coyoteTime = 0.5F;
+
         private InputAction _jumpAction;
         private float _jumpTimer;
         private bool _doJump;
@@ -33,6 +35,9 @@ namespace Game.Player.Action
 
         private void OnJumpPerformed(InputAction.CallbackContext ctx)
         {
+            if (playerState.LastGroundedTime + coyoteTime < Time.time)
+                return;
+
             playerState.IsJumping = true;
         }
 
@@ -44,6 +49,8 @@ namespace Game.Player.Action
 
         private void Update()
         {
+            if (playerState.Immobile) return;
+
             _jumpTimer += Time.deltaTime;
 
             if (playerState.IsGrounded)

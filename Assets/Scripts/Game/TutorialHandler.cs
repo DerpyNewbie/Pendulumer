@@ -11,7 +11,7 @@ namespace Game
         [SerializeField] private ActionImageSwapper movementRightSwapper;
         [SerializeField] private ActionImageSwapper hookShotSwapper;
         [SerializeField] private TextMeshProUGUI hookShotText;
-        [SerializeField] private HookShotAction hookShotAction;
+        [SerializeField] private Player.Action.HookShotAction hookShotAction;
         [SerializeField] private string hookShotActivateName = "Shoot Hook Shot";
         [SerializeField] private string hookShotDeactivateName = "Release Hook Shot";
 
@@ -25,8 +25,8 @@ namespace Game
 
         private void Start()
         {
-            hookShotAction.OnActivated += () => hookShotText.text = hookShotDeactivateName;
-            hookShotAction.OnDeactivated += () => hookShotText.text = hookShotActivateName;
+            hookShotAction.OnHookShotActivated += () => hookShotText.text = hookShotDeactivateName;
+            hookShotAction.OnHookShotDeactivated += () => hookShotText.text = hookShotActivateName;
         }
 
         private void Update()

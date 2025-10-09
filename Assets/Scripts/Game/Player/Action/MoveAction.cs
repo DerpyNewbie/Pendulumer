@@ -22,7 +22,7 @@ namespace Game.Player.Action
 
         private void Update()
         {
-            if (playerState.IsCrouching || playerState.IsSliding)
+            if (playerState.Immobile || playerState.IsCrouching || playerState.IsSliding)
             {
                 return;
             }

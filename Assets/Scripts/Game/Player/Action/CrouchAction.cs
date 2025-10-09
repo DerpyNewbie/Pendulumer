@@ -39,6 +39,8 @@ namespace Game.Player.Action
 
         private void Update()
         {
+            if (playerState.Immobile) return;
+
             var isStationary = playerState.Rigidbody.linearVelocity.sqrMagnitude <= crouchableMaxSpeed;
             playerState.IsCrouching = _doCrouch && isStationary;
         }
