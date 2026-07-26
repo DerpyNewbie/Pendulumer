@@ -107,7 +107,7 @@ body {
     background-repeat: repeat-x;
     background-position: top;
     background-origin: border-box;
-    background-image: url('pendulumer/img/background.png');
+    background-image: url('./img/background.png');
 }
 
 .content {
