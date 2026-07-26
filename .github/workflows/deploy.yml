@@ -1,0 +1,21 @@
+name: Deploy to Cloudflare Workers
+on:
+    workflow_dispatch:
+    push:
+        branches: [ main ]
+
+concurrency:
+    group: "pages"
+    cancel-in-progress: true
+
+jobs:
+    deploy:
+        name: deploy
+        runs-on: ubuntu-latest
+        steps:
+            -   uses: actions/checkout@v4
+            -   name: Deploy to Cloudflare workers
+                uses: cloudflare/wrangler-action@v4
+                with:
+                    apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+                    accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
