@@ -5,6 +5,6 @@
         "enabled": true
     },
     "assets": {
-        "directory": "pendulumer/"
+        "directory": "public/"
     }
 }
